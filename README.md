@@ -110,7 +110,7 @@ Start haproxy
 ## Observations
 Visit site
 
-http://127.0.0.1:1000/csp-demo (directly via app)
+http://127.0.0.1:10000/csp-demo (directly via app)
 
 http://127.0.0.1:8081/csp-demo (through haproxy)
 
