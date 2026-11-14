@@ -15,17 +15,22 @@ Load-balancing software can be used to examine traffic patterns and route traffi
 
 ## Run it
 Start app
+
 `PORT=10000 python3 app/app.py`
+
 `PORT=10001 python3 app/app.py`
 
 Start haproxy
+
 `haproxy -c haproxy/demo1.cfg`
 
 ## Observations
 http://localhost:10000
+
 Refresh the page a bunch, notice no change because you are going directly to the application, which will always serve the request.
 
 http://localhost:8081
+
 Refresh the page a bunch, watch the requests land on the 10001 app because haproxy is noticing your spammy requests and routing you to the penalty box instance of the app
 
 # Demo 2: Web server request inspection
@@ -33,15 +38,20 @@ Web servers like Apache and nginx are built to service web requests. They are ex
 
 ## Run it
 Start apache
+
 `apache2 -f "$PWD/apache/demo2.conf" -DFOREGROUND`
 
 Start app
+
 `PORT=10000 python3 app/app.py`
 
 ## Observations
 Visit site
+
 http://localhost:10000/api/preferences?user=alice
+
 http://localhost:10000/api/preferences?user=bob
+
 http://localhost:10000/api/preferences?user=../app.py
 
 Problem: application has a path traversal vulnerability
@@ -71,8 +81,11 @@ Listen 8003
 The SecRule inspects the `user` GET parameter for `../` to prevent path traversal and automatically returns a 403
 
 Now visit
+
 http://localhost:8003/api/preferences?user=alice
+
 http://localhost:8003/api/preferences?user=bob
+
 http://localhost:8003/api/preferences?user=../app.py
 
 Notice the difference in behavior when path traversal is attempted.
@@ -87,14 +100,18 @@ Aside from steering traffic and denying unappetizing requests, load balancers an
 
 ## Run it
 Start app
+
 `PORT=10000 python3 app.py`
 
 Start haproxy
+
 `haproxy -f haproxy/demo3.cfg`
 
 ## Observations
 Visit site
+
 http://127.0.0.1:1000/csp-demo (directly via app)
+
 http://127.0.0.1:8081/csp-demo (through haproxy)
 
 Note that the button does not work through haproxy. This is because haproxy is manipulating a response header.  The `Content-Security-Policy` header can be used to control things like this, including controlling where Javascript can be executed from. This page has inline Javascript which cannot run when the `script-src` is set to `self`. Read more about the Content-Security-Policy header here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src
@@ -106,17 +123,22 @@ However this information can introduce privacy concerns as well. Browser fingerp
 
 ## Run it
 Start app
+
 `PORT=10000 python3 app.py`
 
 Start haproxy
+
 `haproxy -f haproxy/demo4.cfg`
 
 ## Observations
 Visit site
+
 http://localhost:10000/inspect (directly through app)
+
 ^ Note the output on the app console from a request to /inspect - it's accompanied by a request to /api/browser-info
 
 http://localhost:8081/inspect (through haproxy)
+
 ^ Note the lack of console output from the /api/browser-info endpoint
 
 The information seen by the application is radically different. Haproxy is enforcing the same Javascript restrictions from the previous demo, so the Javascript fails to run and can't collect (and send) extra information about the client system to the server. Headers persist but are manipulated by haproxy.
