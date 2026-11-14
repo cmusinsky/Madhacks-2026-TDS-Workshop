@@ -22,7 +22,7 @@ Start app
 
 Start haproxy
 
-`haproxy -c haproxy/demo1.cfg`
+`haproxy -f haproxy/demo1.cfg`
 
 ## Observations
 http://localhost:10000
